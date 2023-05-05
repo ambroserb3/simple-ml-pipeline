@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  data-prep:
+    build: ./data-prep
+    volumes:
+      - data_volume:/app/data
+
+  train:
+    build: ./train
+    depends_on:
+      - data-prep
+    volumes:
+      - data_volume:/app/data
+      - model_volume:/app/model
+
+  evaluate:
+    build: ./evaluate
+    depends_on:
+      - train
+    volumes:
+      - data_volume:/app/data
+      - model_volume:/app/model
+
+  deploy:
+    build: ./deploy
+    depends_on:
+      - data-prep
+      - train
+      - evaluate
+    ports:
+      - "5000:5000"
+    volumes:
+      - model_volume:/app/model
+
+volumes:
+  data_volume:
+  model_volume:
